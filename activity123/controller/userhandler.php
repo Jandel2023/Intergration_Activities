@@ -17,6 +17,11 @@ class Userhandler extends Dbconnection{
         $password = $insertdata['password'];
         $token = $insertdata['token'];
 
+        $checksql = $this->conn->query("SELECT * FROM users WHERE email = '$email' ");
+        if($checksql->num_rows > 0){
+            return ['message' => 'Email already exists!'];
+        }else{
+
         $ifinsert = $this->conn->query("INSERT INTO users (fname,lname,email,password,token) VALUES
         ('$fname','$lname','$email','$password','$token')");
 
@@ -26,6 +31,7 @@ class Userhandler extends Dbconnection{
             return ['message' => 'Insert failed!'];
         }
     }
+}
 
     public function getallusers(){
         $data = $this->conn->query("SELECT * FROM users");

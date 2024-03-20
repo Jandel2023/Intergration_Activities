@@ -6,6 +6,7 @@ class Userhandler extends Dbconnection{
     public function insertuser(array $insertdata){
 
         $data = ['fname','lname','email','password','token'];
+
         foreach($data as $key){ 
             if(empty($insertdata[$key])){
                 return['message' => " {$key} is required!"];
@@ -17,15 +18,26 @@ class Userhandler extends Dbconnection{
         $password = $insertdata['password'];
         $token = $insertdata['token'];
 
-        $ifinsert = $this->conn->query("INSERT INTO users (fname,lname,email,password,token) VALUES
-        ('$fname','$lname','$email','$password','$token')");
+        $checksql = $this->conn->query("SELECT * FROM users WHERE email = '$email' ");
+        if($checksql->num_rows > 0){
+            return ['message' => 'Email already exists!'];
+        }else{
+
+        $prepare = $this->conn->prepare("INSERT INTO users (fname,lname,email,password,token) VALUES (?, ?, ?, ?, ?)");
+        $prepare->bind_param("sssss",$fname,$lname,$email,$password,$token);
+        $ifinsert = $prepare->execute();
+        $prepare->close();
 
         if($ifinsert){
             return ['message' => 'Inserted Successfully!'];
         }else{
             return ['message' => 'Insert failed!'];
         }
+
     }
+
+    }
+
 
     public function getallusers(){
         $data = $this->conn->query("SELECT * FROM users");
