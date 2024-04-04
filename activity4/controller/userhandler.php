@@ -39,25 +39,36 @@ class Userhandler extends Dbconnection{
     }
 
 
+    
+
+
     public function getallusers(){
         $data = $this->conn->query("SELECT * FROM users");
         $result = $data->fetch_all(MYSQLI_ASSOC);
         return $result;
     }
 
+
+
+
+
     public function searchbyemail(array $search){
         if(empty($search['email'])){
             return json_encode(['message' => 'Please provide email.']);
         }
         //$email = $this->conn->real_escape_string($search['email']);
-        $email = $_GET['email'] ?? null;
-        $sql = $this->conn->query("SELECT * FROM users WHERE email LIKE '%$email%'");
-        $data = $sql->fetch_all(MYSQLI_ASSOC);
+        $email = $search['email'] ?? null;
+        $getemail = "%$email%";
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE email LIKE ? ");
+       $stmt->bind_param('s',$getemail);
+        $stmt->execute();
+        $data = $stmt->get_result();
+        $datas = $data->fetch_all(MYSQLI_ASSOC);
         
-        if ($data){
-            return $data;
+        if ($datas){
+            return $datas;
         }else{
-            return json_encode(['message'=>'No record found!']);
+            return ['message'=>'No record found!'];
         }
        
     }
